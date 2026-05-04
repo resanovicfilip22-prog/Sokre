@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Sokre</title>
+<style>
+:root {
+  --red:    #e94560;
+  --green:  #27ae60;
+  --yellow: #f1c40f;
+  --dark:   #0d1117;
+  --card:   #161b22;
+  --border: #21262d;
+  --text:   #e6edf3;
+  --muted:  #8b949e;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%; background: var(--dark);
+  color: var(--text); overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.screen {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.screen.hidden { display: none; }
+
+/* ════ START ════ */
+#startScreen { gap: 52px; }
+
+.logo h1 {
+  font-size: clamp(2.8rem, 12vw, 4rem);
+  font-weight: 900; letter-spacing: 10px; text-align: center;
+}
+.logo p {
+  text-align: center; color: var(--muted);
+  letter-spacing: 4px; font-size: 0.8rem; margin-top: 6px;
+}
+
+.btn-primary {
+  background: var(--red); color: #fff; border: none;
+  padding: 17px 60px; font-size: 1.05rem; font-weight: 700;
+  letter-spacing: 4px; border-radius: 50px; cursor: pointer;
+  box-shadow: 0 6px 24px rgba(233,69,96,.45); transition: transform .1s;
+}
+.btn-primary:active { transform: scale(.94); }
+
+/* ════ GAME ════ */
+#gameScreen {
+  justify-content: flex-start;
+  align-items: stretch;
+  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
+  padding: env(safe-area-inset-top, 8px) 8px max(env(safe-area-inset-bottom, 0px), 12px);
+  overflow: hidden;
+}
+
+/* TOP BAR */
+.topbar {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding-bottom: 7px; flex-shrink: 0;
+}
+
+.btn-top {
+  padding: 8px 14px; border: none; border-radius: 10px;
+  font-size: .78rem; font-weight: 700; cursor: pointer;
+  transition: transform .1s;
+}
+.btn-top:active { transform: scale(.92); }
+.btn-t-reset { background: var(--border); color: var(--muted); }
+.btn-t-end   { background: var(--red); color: #fff; }
+
+.game-badge {
+  font-size: .6rem; font-weight: 900;
+  letter-spacing: 4px; color: var(--muted);
+}
+
+/* ── MAIN 3-COLUMN AREA ── */
+.main-area {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: row; gap: 6px;
+  overflow: hidden;
+}
+
+/* RESOURCE COLUMNS */
+.res-col {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+}
+
+.col-hdr {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 10px 4px 8px; flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.pname {
+  font-size: .55rem; font-weight: 700;
+  letter-spacing: 2px; color: var(--muted);
+}
+
+.p-score {
+  font-size: 1.9rem; font-weight: 900;
+  line-height: 1.1; margin-top: 2px; transition: color .2s;
+}
+.p-score.red    { color: var(--red); }
+.p-score.green  { color: var(--green); }
+.p-score.yellow { color: var(--yellow); }
+
+.res-blocks {
+  flex: 1; display: flex; flex-direction: column;
+  justify-content: space-evenly; padding: 6px 6px;
+}
+
+.res-block {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 5px;
+}
+
+.res-lbl {
+  display: flex; align-items: center; gap: 4px;
+  font-size: .57rem; color: var(--muted);
+  max-width: 100%; overflow: hidden;
+}
+
+.dot {
+  width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0;
+}
+.dot-l { background: #27ae60; }
+.dot-i { background: #e74c3c; }
+.dot-k { background: #2980b9; }
+
+.res-name {
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.res-ctrl { display: flex; align-items: center; gap: 3px; }
+
+.btn-r {
+  width: 30px; height: 30px; border: none; border-radius: 7px;
+  font-size: .75rem; font-weight: 900; cursor: pointer; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .08s; flex-shrink: 0;
+}
+.btn-r:active { transform: scale(.84); }
+.btn-up { background: var(--green); }
+.btn-dn { background: var(--red); }
+
+.res-val {
+  font-size: 1rem; font-weight: 700;
+  min-width: 26px; text-align: center;
+}
+
+/* ── SEMAFOR (CENTER) ── */
+.sem-col {
+  width: 80px; flex-shrink: 0;
+  display: flex; flex-direction: column;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+}
+
+.sem-vp {
+  flex: 1; position: relative;
+  overflow: hidden; touch-action: none; cursor: grab;
+}
+
+.sem-vp::before, .sem-vp::after {
+  content: ''; position: absolute; left: 0; right: 0;
+  height: 64px; z-index: 5; pointer-events: none;
+}
+.sem-vp::before { top: 0; background: linear-gradient(to bottom, var(--card), transparent); }
+.sem-vp::after  { bottom: 0; background: linear-gradient(to top, var(--card), transparent); }
+
+.sem-center-box {
+  position: absolute; top: 50%; left: 4px; right: 4px;
+  transform: translateY(-50%); height: 46px;
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.05);
+  pointer-events: none; z-index: 3;
+}
+
+.sem-track { display: flex; flex-direction: column; will-change: transform; }
+
+.sem-row {
+  display: flex; align-items: center;
+  height: 44px; padding: 0 4px;
+}
+
+.rv {
+  flex: 1; text-align: center; font-size: .8rem; font-weight: 600;
+  color: var(--muted); border-radius: 5px; padding: 4px 0;
+  transition: color .12s, font-size .12s;
+}
+.rsep { width: 8px; text-align: center; color: var(--border); font-size: .55rem; flex-shrink: 0; }
+
+.sem-row.active .rv.p1 { color: var(--red);   font-size: .93rem; font-weight: 900; }
+.sem-row.active .rv.p2 { color: var(--green); font-size: .93rem; font-weight: 900; }
+.sem-row.active.pos .rv.p1 { color: var(--green); }
+.sem-row.active.pos .rv.p2 { color: var(--red); }
+.sem-row.active.zer .rv.p1,
+.sem-row.active.zer .rv.p2 { color: var(--yellow); }
+
+/* ── STEP BAR ── */
+.step-bar {
+  flex-shrink: 0; display: flex;
+  align-items: center; gap: 8px; padding-top: 7px;
+}
+
+.step-one {
+  padding: 9px 14px; flex-shrink: 0;
+  border: 1px solid var(--border); background: var(--card);
+  color: var(--muted); border-radius: 8px;
+  font-size: .82rem; font-weight: 700; cursor: pointer;
+  white-space: nowrap; transition: background .15s, color .15s, border-color .15s;
+}
+.step-one.active { background: var(--red); border-color: var(--red); color: #fff; }
+
+.step-input-grp { display: flex; align-items: center; gap: 6px; flex: 1; }
+.step-input-lbl { font-size: .72rem; color: var(--muted); white-space: nowrap; }
+
+.step-input {
+  flex: 1; min-width: 0;
+  padding: 9px 8px; background: var(--card);
+  border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); font-size: .9rem; font-weight: 700;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+.step-input::-webkit-outer-spin-button,
+.step-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.step-input:focus { outline: none; border-color: var(--red); }
+
+/* ════ END ════ */
+#endScreen { gap: 28px; text-align: center; padding: 24px; }
+.end-h1  { font-size: 1.5rem; font-weight: 900; }
+.end-sc  { font-size: 3rem; font-weight: 900; color: var(--yellow); margin-top: 4px; }
+.end-sub { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+.end-win { font-size: 1.3rem; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<!-- ════ START ════ -->
+<div class="screen" id="startScreen">
+  <div class="logo">
+    <h1>SOKRE</h1>
+    <p>Score Tracker</p>
+  </div>
+  <button class="btn-primary" onclick="startGame()">START</button>
+</div>
+
+<!-- ════ GAME ════ -->
+<div class="screen hidden" id="gameScreen">
+
+  <div class="topbar">
+    <button class="btn-top btn-t-reset" onclick="doReset()">↺ Reset</button>
+    <span class="game-badge">SOKRE</span>
+    <button class="btn-top btn-t-end" onclick="doEnd()">Kraj igre</button>
+  </div>
+
+  <div class="main-area">
+
+    <!-- IGRAČ 1 -->
+    <div class="res-col">
+      <div class="col-hdr">
+        <div class="pname">IGRAČ 1</div>
+        <div class="p-score yellow" id="sv1">0</div>
+      </div>
+      <div class="res-blocks">
+        <div class="res-block">
+          <div class="res-lbl"><div class="dot dot-l"></div><span class="res-name">Ljudstvo</span></div>
+          <div class="res-ctrl">
+            <button class="btn-r btn-dn" onclick="chRes(0,0,-1)">▼</button>
+            <span class="res-val" id="r00">0</span>
+            <button class="btn-r btn-up" onclick="chRes(0,0,1)">▲</button>
+          </div>
+        </div>
+        <div class="res-block">
+          <div class="res-lbl"><div class="dot dot-i"></div><span class="res-name">Industrija</span></div>
+          <div class="res-ctrl">
+            <button class="btn-r btn-dn" onclick="chRes(0,1,-1)">▼</button>
+            <span class="res-val" id="r01">0</span>
+            <button class="btn-r btn-up" onclick="chRes(0,1,1)">▲</button>
+          </div>
+        </div>
+        <div class="res-block">
+          <div class="res-lbl"><div class="dot dot-k"></div><span class="res-name">Kapital</span></div>
+          <div class="res-ctrl">
+            <button class="btn-r btn-dn" onclick="chRes(0,2,-1)">▼</button>
+            <span class="res-val" id="r02">0</span>
+            <button class="btn-r btn-up" onclick="chRes(0,2,1)">▲</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEMAFOR -->
+    <div class="sem-col">
+      <div class="sem-vp" id="semVp">
+        <div class="sem-center-box"></div>
+        <div class="sem-track" id="semTrack"></div>
+      </div>
+    </div>
+
+    <!-- IGRAČ 2 -->
+    <div class="res-col">
+      <div class="col-hdr">
+        <div class="pname">IGRAČ 2</div>
+        <div class="p-score yellow" id="sv2">0</div>
+      </div>
+      <div class="res-blocks">
+        <div class="res-block">
+          <div class="res-lbl"><div class="dot dot-l"></div><span class="res-name">Ljudstvo</span></div>
+          <div class="res-ctrl">
+            <button class="btn-r btn-dn" onclick="chRes(1,0,-1)">▼</button>
+            <span class="res-val" id="r10">0</span>
+            <button class="btn-r btn-up" onclick="chRes(1,0,1)">▲</button>
+          </div>
+        </div>
+        <div class="res-block">
+          <div class="res-lbl"><div class="dot dot-i"></div><span class="res-name">Industrija</span></div>
+          <div class="res-ctrl">
+            <button class="btn-r btn-dn" onclick="chRes(1,1,-1)">▼</button>
+            <span class="res-val" id="r11">0</span>
+            <button class="btn-r btn-up" onclick="chRes(1,1,1)">▲</button>
+          </div>
+        </div>
+        <div class="res-block">
+          <div class="res-lbl"><div class="dot dot-k"></div><span class="res-name">Kapital</span></div>
+          <div class="res-ctrl">
+            <button class="btn-r btn-dn" onclick="chRes(1,2,-1)">▼</button>
+            <span class="res-val" id="r12">0</span>
+            <button class="btn-r btn-up" onclick="chRes(1,2,1)">▲</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-area -->
+
+  <div class="step-bar">
+    <button class="step-one active" id="step1btn" onclick="setStep1()">1 korak</button>
+    <div class="step-input-grp">
+      <span class="step-input-lbl">Upiši:</span>
+      <input class="step-input" id="stepInput" type="number" min="1" max="99" placeholder="n">
+    </div>
+  </div>
+
+</div>
+
+<!-- ════ END ════ -->
+<div class="screen hidden" id="endScreen">
+  <div class="end-h1">KRAJ IGRE</div>
+  <div>
+    <div class="end-sc"  id="endSc"></div>
+    <div class="end-sub" id="endSub"></div>
+  </div>
+  <div class="end-win" id="endWin"></div>
+  <button class="btn-primary" onclick="doReset()">↺ NOVA IGRA</button>
+</div>
+
+<script>
+const MIN = -20, MAX = 20, ROW_H = 44;
+let sv = 0;
+let res = [[0,0,0],[0,0,0]];
+let step = 1;
+let dragInit = false;
+
+// ── SEMAFOR BUILD ──
+function buildSemafor() {
+  const vp    = document.getElementById('semVp');
+  const track = document.getElementById('semTrack');
+  const vpH   = vp.clientHeight;
+  const pad   = Math.ceil(vpH / 2 / ROW_H) + 1;
+  track.innerHTML = '';
+
+  const f = document.createDocumentFragment();
+  for (let i = 0; i < pad; i++) f.appendChild(padRow());
+  for (let v = MIN; v <= MAX; v++) f.appendChild(dataRow(v));
+  for (let i = 0; i < pad; i++) f.appendChild(padRow());
+  track.appendChild(f);
+
+  renderSem(false);
+}
+
+function padRow() {
+  const d = document.createElement('div');
+  d.className = 'sem-row'; d.style.height = ROW_H + 'px'; return d;
+}
+
+function dataRow(v) {
+  const row = document.createElement('div');
+  row.className = 'sem-row'; row.dataset.v = v;
+  const p1 = document.createElement('span'); p1.className = 'rv p1'; p1.textContent = v;
+  const sp = document.createElement('span'); sp.className = 'rsep'; sp.textContent = '|';
+  const p2 = document.createElement('span'); p2.className = 'rv p2'; p2.textContent = -v;
+  row.append(p1, sp, p2); return row;
+}
+
+// ── RENDER ──
+function renderSem(anim) {
+  const vp    = document.getElementById('semVp');
+  const track = document.getElementById('semTrack');
+  const vpH   = vp.clientHeight;
+  const pad   = Math.ceil(vpH / 2 / ROW_H) + 1;
+  const rowIdx = pad + (sv - MIN);
+  const offset = vpH / 2 - rowIdx * ROW_H - ROW_H / 2;
+
+  track.style.transition = anim ? 'transform .15s ease' : 'none';
+  track.style.transform  = `translateY(${offset}px)`;
+
+  track.querySelectorAll('.sem-row[data-v]').forEach(r => {
+    const v = +r.dataset.v, on = v === sv;
+    r.classList.toggle('active', on);
+    r.classList.toggle('pos', on && v > 0);
+    r.classList.toggle('zer', on && v === 0);
+  });
+
+  const fmt = n => n > 0 ? '+' + n : String(n);
+  const el1 = document.getElementById('sv1');
+  const el2 = document.getElementById('sv2');
+  el1.textContent = fmt(sv);
+  el2.textContent = fmt(-sv);
+  el1.className = 'p-score ' + scoreClass(sv);
+  el2.className = 'p-score ' + scoreClass(-sv);
+}
+
+function scoreClass(n) { return n > 0 ? 'green' : n < 0 ? 'red' : 'yellow'; }
+
+// ── DRAG ──
+let dy0, sv0, dragging = false;
+
+function initDrag() {
+  if (dragInit) return;
+  dragInit = true;
+  const vp = document.getElementById('semVp');
+
+  vp.addEventListener('touchstart', e => {
+    dragging = true; dy0 = e.touches[0].clientY; sv0 = sv;
+    e.preventDefault();
+  }, { passive: false });
+
+  vp.addEventListener('touchmove', e => {
+    if (!dragging) return;
+    // drag down = +P1 (positive scores at bottom of list)
+    const d  = Math.round((e.touches[0].clientY - dy0) / ROW_H);
+    const nv = Math.max(MIN, Math.min(MAX, sv0 + d));
+    if (nv !== sv) { sv = nv; renderSem(false); }
+    e.preventDefault();
+  }, { passive: false });
+
+  vp.addEventListener('touchend', () => { dragging = false; });
+
+  // mouse fallback for desktop testing
+  vp.addEventListener('mousedown', e => { dragging = true; dy0 = e.clientY; sv0 = sv; });
+  window.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const d  = Math.round((e.clientY - dy0) / ROW_H);
+    const nv = Math.max(MIN, Math.min(MAX, sv0 + d));
+    if (nv !== sv) { sv = nv; renderSem(false); }
+  });
+  window.addEventListener('mouseup', () => { dragging = false; });
+}
+
+// ── STEP ──
+function setStep1() {
+  step = 1;
+  document.getElementById('stepInput').value = '';
+  document.getElementById('step1btn').classList.add('active');
+}
+
+document.getElementById('stepInput').addEventListener('input', function () {
+  const v = parseInt(this.value);
+  if (!isNaN(v) && v >= 1) {
+    step = v;
+    document.getElementById('step1btn').classList.remove('active');
+  } else if (!this.value) {
+    setStep1();
+  }
+});
+
+// ── RESOURCES ──
+function chRes(p, r, dir) {
+  res[p][r] = Math.max(0, res[p][r] + dir * step);
+  document.getElementById('r' + p + r).textContent = res[p][r];
+}
+
+// ── FLOW ──
+function startGame() {
+  show('gameScreen'); hide('startScreen');
+  requestAnimationFrame(() => { buildSemafor(); initDrag(); });
+}
+
+function doReset() {
+  sv = 0; res = [[0,0,0],[0,0,0]];
+  for (let p = 0; p < 2; p++)
+    for (let r = 0; r < 3; r++)
+      document.getElementById('r' + p + r).textContent = 0;
+  show('gameScreen'); hide('endScreen');
+  renderSem(true);
+}
+
+function doEnd() {
+  const fmt = n => (n > 0 ? '+' : '') + n;
+  document.getElementById('endSc').textContent  = fmt(sv) + ' / ' + fmt(-sv);
+  document.getElementById('endSub').textContent =
+    sv > 0 ? 'Igrač 1 vodi za ' + sv * 2 + ' bodova'
+  : sv < 0 ? 'Igrač 2 vodi za ' + (-sv * 2) + ' bodova'
+  :          'Oba igrača su izjednačena';
+  document.getElementById('endWin').textContent =
+    sv > 0 ? '🏆 Pobjednik: IGRAČ 1'
+  : sv < 0 ? '🏆 Pobjednik: IGRAČ 2'
+  :          '🤝 Izjednačeno';
+  show('endScreen'); hide('gameScreen');
+}
+
+function show(id) { document.getElementById(id).classList.remove('hidden'); }
+function hide(id) { document.getElementById(id).classList.add('hidden');   }
+</script>
+</body>
+</html>
