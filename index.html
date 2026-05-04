@@ -34,7 +34,29 @@ html, body {
 .screen.hidden { display: none; }
 
 /* ════ START ════ */
-#startScreen { gap: 52px; }
+#startScreen { gap: 36px; }
+
+.name-inputs {
+  display: flex; flex-direction: column; gap: 10px;
+  width: 100%; max-width: 280px;
+}
+
+.name-input-wrap { position: relative; }
+
+.name-input-lbl {
+  position: absolute; top: -8px; left: 12px;
+  font-size: .6rem; font-weight: 700; letter-spacing: 2px;
+  color: var(--muted); background: var(--dark); padding: 0 4px;
+}
+
+.name-input {
+  width: 100%; padding: 13px 14px 13px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text);
+  font-size: 1rem; font-weight: 600;
+}
+.name-input:focus { outline: none; border-color: var(--red); }
+.name-input::placeholder { color: var(--muted); font-weight: 400; }
 
 .logo h1 {
   font-size: clamp(2.8rem, 12vw, 4rem);
@@ -259,6 +281,16 @@ html, body {
     <h1>SOKRE</h1>
     <p>Score Tracker</p>
   </div>
+  <div class="name-inputs">
+    <div class="name-input-wrap">
+      <span class="name-input-lbl">IGRAČ 1</span>
+      <input class="name-input" id="nameInput1" type="text" maxlength="16" placeholder="Ime igrača 1">
+    </div>
+    <div class="name-input-wrap">
+      <span class="name-input-lbl">IGRAČ 2</span>
+      <input class="name-input" id="nameInput2" type="text" maxlength="16" placeholder="Ime igrača 2">
+    </div>
+  </div>
   <button class="btn-primary" onclick="startGame()">START</button>
 </div>
 
@@ -276,7 +308,7 @@ html, body {
     <!-- IGRAČ 1 -->
     <div class="res-col">
       <div class="col-hdr">
-        <div class="pname">IGRAČ 1</div>
+        <div class="pname" id="pname1">IGRAČ 1</div>
         <div class="p-score yellow" id="sv1">0</div>
       </div>
       <div class="res-blocks">
@@ -318,7 +350,7 @@ html, body {
     <!-- IGRAČ 2 -->
     <div class="res-col">
       <div class="col-hdr">
-        <div class="pname">IGRAČ 2</div>
+        <div class="pname" id="pname2">IGRAČ 2</div>
         <div class="p-score yellow" id="sv2">0</div>
       </div>
       <div class="res-blocks">
@@ -378,6 +410,7 @@ let sv = 0;
 let res = [[0,0,0],[0,0,0]];
 let step = 1;
 let dragInit = false;
+let names = ['IGRAČ 1', 'IGRAČ 2'];
 
 // ── SEMAFOR BUILD ──
 function buildSemafor() {
@@ -500,6 +533,12 @@ function chRes(p, r, dir) {
 
 // ── FLOW ──
 function startGame() {
+  const n1 = document.getElementById('nameInput1').value.trim();
+  const n2 = document.getElementById('nameInput2').value.trim();
+  names[0] = n1 || 'IGRAČ 1';
+  names[1] = n2 || 'IGRAČ 2';
+  document.getElementById('pname1').textContent = names[0];
+  document.getElementById('pname2').textContent = names[1];
   show('gameScreen'); hide('startScreen');
   requestAnimationFrame(() => { buildSemafor(); initDrag(); });
 }
@@ -517,12 +556,12 @@ function doEnd() {
   const fmt = n => (n > 0 ? '+' : '') + n;
   document.getElementById('endSc').textContent  = fmt(sv) + ' / ' + fmt(-sv);
   document.getElementById('endSub').textContent =
-    sv > 0 ? 'Igrač 1 vodi za ' + sv * 2 + ' bodova'
-  : sv < 0 ? 'Igrač 2 vodi za ' + (-sv * 2) + ' bodova'
+    sv > 0 ? names[0] + ' vodi za ' + sv * 2 + ' bodova'
+  : sv < 0 ? names[1] + ' vodi za ' + (-sv * 2) + ' bodova'
   :          'Oba igrača su izjednačena';
   document.getElementById('endWin').textContent =
-    sv > 0 ? '🏆 Pobjednik: IGRAČ 1'
-  : sv < 0 ? '🏆 Pobjednik: IGRAČ 2'
+    sv > 0 ? '🏆 Pobjednik: ' + names[0]
+  : sv < 0 ? '🏆 Pobjednik: ' + names[1]
   :          '🤝 Izjednačeno';
   show('endScreen'); hide('gameScreen');
 }
